@@ -43,6 +43,22 @@ npm run build
 
 Upload the contents of `dist/` to any static host.
 
+## GitHub Pages
+
+The repo has a GitHub Actions workflow at `.github/workflows/pages.yml`. Every push to `main` builds the app and deploys it to:
+
+```text
+https://matt-bat.github.io/protoverse-lab/
+```
+
+The workflow builds with:
+
+```sh
+npm run build -- --base=/protoverse-lab/
+```
+
+That base path matters because GitHub Pages serves project sites from a subfolder.
+
 ## Known Limits
 
 - Rendering uses WebGL through Three.js and React Three Fiber.

@@ -39,6 +39,14 @@ npm run dev
 
 Vite usually opens at `http://127.0.0.1:5173`. If that port is busy, it will print the next available local URL.
 
+## Live Site
+
+GitHub Pages serves the public build here:
+
+```text
+https://matt-bat.github.io/protoverse-lab/
+```
+
 ## Test And Build
 
 ```sh
@@ -77,4 +85,3 @@ Particle species are not literal Standard Model particles. They are coarse simul
 ## Credit
 
 Designed and created by Matthew Bateman.
-
