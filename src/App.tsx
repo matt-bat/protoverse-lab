@@ -55,6 +55,7 @@ type ParamDef = {
   step: number;
   suffix: string;
   group: "Physical-ish" | "Sandbox" | "Engine";
+  tooltip: string;
 };
 
 const STORAGE_KEY = "cosmic-seed-sim.library.v2";
@@ -141,35 +142,92 @@ const PRESETS: Record<PresetKey, Partial<SimParams>> = {
 };
 
 const PARAM_DEFS: ParamDef[] = [
-  { key: "universeSizeLy", label: "Universe size", step: 100, suffix: "ly", group: "Physical-ish" },
-  { key: "totalMassSolar", label: "Total mass", step: 100000000, suffix: "Msun", group: "Physical-ish" },
-  { key: "particleCount", label: "Particle packets", step: 1000, suffix: "", group: "Engine" },
-  { key: "expansionRate", label: "Expansion rate", step: 0.01, suffix: "", group: "Physical-ish" },
-  { key: "initialTemperature", label: "Initial heat", step: 0.01, suffix: "", group: "Physical-ish" },
-  { key: "matterDensity", label: "Matter density", step: 0.01, suffix: "", group: "Physical-ish" },
-  { key: "radiationDensity", label: "Radiation balance", step: 0.01, suffix: "", group: "Physical-ish" },
-  { key: "radiantShare", label: "Radiant packet share", step: 0.01, suffix: "x", group: "Physical-ish" },
-  { key: "baryonShare", label: "Baryon packet share", step: 0.01, suffix: "x", group: "Physical-ish" },
-  { key: "neutralShare", label: "Neutral packet share", step: 0.01, suffix: "x", group: "Physical-ish" },
-  { key: "leptonShare", label: "Lepton packet share", step: 0.01, suffix: "x", group: "Physical-ish" },
-  { key: "seedMetalShare", label: "Trace heavy seed share", step: 0.01, suffix: "x", group: "Sandbox" },
-  { key: "exoticShare", label: "Exotic packet share", step: 0.01, suffix: "x", group: "Sandbox" },
-  { key: "isotopeInstability", label: "Isotope instability", step: 0.01, suffix: "", group: "Sandbox" },
-  { key: "primordialTraceElements", label: "Primordial trace elements", step: 0.01, suffix: "", group: "Sandbox" },
-  { key: "darkMatterStrength", label: "Dark matter wells", step: 0.01, suffix: "", group: "Physical-ish" },
-  { key: "fluctuationAmplitude", label: "Density fluctuations", step: 0.01, suffix: "", group: "Physical-ish" },
-  { key: "turbulence", label: "Initial turbulence", step: 0.01, suffix: "", group: "Sandbox" },
-  { key: "gravityStrength", label: "Gravity strength", step: 0.01, suffix: "", group: "Sandbox" },
-  { key: "coolingEfficiency", label: "Cooling efficiency", step: 0.01, suffix: "", group: "Physical-ish" },
-  { key: "gasRetention", label: "Gas retention", step: 0.01, suffix: "", group: "Physical-ish" },
-  { key: "starFormationThreshold", label: "Star threshold", step: 0.01, suffix: "", group: "Physical-ish" },
-  { key: "massiveStarFraction", label: "Massive star fraction", step: 0.01, suffix: "", group: "Physical-ish" },
-  { key: "supernovaYield", label: "Element yield", step: 0.01, suffix: "", group: "Physical-ish" },
-  { key: "metalDispersal", label: "Metal dispersal", step: 0.01, suffix: "", group: "Physical-ish" },
-  { key: "planetSensitivity", label: "Planet sensitivity", step: 0.01, suffix: "", group: "Sandbox" },
-  { key: "lifeProbability", label: "Life probability", step: 0.01, suffix: "", group: "Sandbox" },
-  { key: "catastropheRate", label: "Catastrophe rate", step: 0.01, suffix: "", group: "Sandbox" }
+  { key: "universeSizeLy", label: "Universe size", step: 100, suffix: "ly", group: "Physical-ish", tooltip: "Sets the simulated pocket-universe width in light years. Larger spaces spread packets out more." },
+  { key: "totalMassSolar", label: "Total mass", step: 100000000, suffix: "Msun", group: "Physical-ish", tooltip: "Total mass represented by the packet field, measured in rough solar-mass units." },
+  { key: "particleCount", label: "Particle packets", step: 1000, suffix: "", group: "Engine", tooltip: "Number of coarse packets in the simulation. More packets give finer structure but cost more CPU and GPU time." },
+  { key: "expansionRate", label: "Expansion rate", step: 0.01, suffix: "", group: "Physical-ish", tooltip: "How strongly packets drift outward before gravity and retention slow them down." },
+  { key: "initialTemperature", label: "Initial heat", step: 0.01, suffix: "", group: "Physical-ish", tooltip: "Starting thermal energy. Hotter runs stay diffuse longer and delay clustering." },
+  { key: "matterDensity", label: "Matter density", step: 0.01, suffix: "", group: "Physical-ish", tooltip: "Overall matter crowding. Higher density makes star formation and enrichment more likely." },
+  { key: "radiationDensity", label: "Radiation balance", step: 0.01, suffix: "", group: "Physical-ish", tooltip: "Radiation pressure in the early field. More radiation resists collapse and keeps regions hot." },
+  { key: "radiantShare", label: "Radiant packet share", step: 0.01, suffix: "x", group: "Physical-ish", tooltip: "Relative amount of radiation-like packets in the starting mix." },
+  { key: "baryonShare", label: "Baryon packet share", step: 0.01, suffix: "x", group: "Physical-ish", tooltip: "Relative amount of ordinary matter packets that can cool, cluster, and form stars." },
+  { key: "neutralShare", label: "Neutral packet share", step: 0.01, suffix: "x", group: "Physical-ish", tooltip: "Relative amount of slow neutral packets that help gas clouds settle." },
+  { key: "leptonShare", label: "Lepton packet share", step: 0.01, suffix: "x", group: "Physical-ish", tooltip: "Relative amount of light charged haze that affects cooling and local temperature." },
+  { key: "seedMetalShare", label: "Trace heavy seed share", step: 0.01, suffix: "x", group: "Sandbox", tooltip: "Starting heavy-element hints. Raising this gives chemistry a head start before supernovae." },
+  { key: "exoticShare", label: "Exotic packet share", step: 0.01, suffix: "x", group: "Sandbox", tooltip: "Relative amount of unstable exotic packets that can stir unusual enrichment paths." },
+  { key: "isotopeInstability", label: "Isotope instability", step: 0.01, suffix: "", group: "Sandbox", tooltip: "How often variant packets behave like unstable isotopes and push material toward enrichment events." },
+  { key: "primordialTraceElements", label: "Primordial trace elements", step: 0.01, suffix: "", group: "Sandbox", tooltip: "Small early traces of element-family material present before stars do most of the work." },
+  { key: "darkMatterStrength", label: "Dark matter wells", step: 0.01, suffix: "", group: "Physical-ish", tooltip: "Strength of invisible gravity wells that help matter gather without directly becoming stars." },
+  { key: "fluctuationAmplitude", label: "Density fluctuations", step: 0.01, suffix: "", group: "Physical-ish", tooltip: "Size of the early uneven spots that seed galaxies, clusters, and void-like regions." },
+  { key: "turbulence", label: "Initial turbulence", step: 0.01, suffix: "", group: "Sandbox", tooltip: "Random early motion. More turbulence creates messier structure and can disrupt collapse." },
+  { key: "gravityStrength", label: "Gravity strength", step: 0.01, suffix: "", group: "Sandbox", tooltip: "How strongly nearby dense regions pull packets together." },
+  { key: "coolingEfficiency", label: "Cooling efficiency", step: 0.01, suffix: "", group: "Physical-ish", tooltip: "How quickly hot gas-like packets lose energy and become able to cluster." },
+  { key: "gasRetention", label: "Gas retention", step: 0.01, suffix: "", group: "Physical-ish", tooltip: "How well the universe keeps matter from escaping the useful simulation volume." },
+  { key: "starFormationThreshold", label: "Star threshold", step: 0.01, suffix: "", group: "Physical-ish", tooltip: "How dense and cool a region needs to be before packets can become star-forming." },
+  { key: "massiveStarFraction", label: "Massive star fraction", step: 0.01, suffix: "", group: "Physical-ish", tooltip: "Share of star formation that becomes short-lived massive stars, driving faster supernova enrichment." },
+  { key: "supernovaYield", label: "Element yield", step: 0.01, suffix: "", group: "Physical-ish", tooltip: "How much enriched element-family material each supernova spreads into nearby packets." },
+  { key: "metalDispersal", label: "Metal dispersal", step: 0.01, suffix: "", group: "Physical-ish", tooltip: "How far heavy elements spread after enrichment events." },
+  { key: "planetSensitivity", label: "Planet sensitivity", step: 0.01, suffix: "", group: "Sandbox", tooltip: "How readily enriched stable regions become rocky-world candidates." },
+  { key: "lifeProbability", label: "Life probability", step: 0.01, suffix: "", group: "Sandbox", tooltip: "How strongly stable rocky regions turn into habitability candidates." },
+  { key: "catastropheRate", label: "Catastrophe rate", step: 0.01, suffix: "", group: "Sandbox", tooltip: "How often disruptive events reduce habitability or scatter developed regions." }
 ];
+
+const TAB_TOOLTIPS: Record<Tab, string> = {
+  run: "Run controls, live outcome, packet mix, and high-level metrics.",
+  params: "Seed and starting-condition controls for generating a new universe.",
+  library: "Saved seeds stored in this browser, with import and export tools.",
+  timeline: "Major simulation events recorded during the current run."
+};
+
+const RENDER_MODE_TOOLTIPS: Record<RenderMode, string> = {
+  species: "Colors packets by their proto-particle species.",
+  elements: "Colors enriched packets by their periodic-table-inspired family.",
+  composition: "Blends species, stars, and enriched material into one view.",
+  density: "Shows crowded regions brighter and warmer.",
+  temperature: "Shows hotter regions in warmer colors and cooler regions in blue-green.",
+  metallicity: "Highlights areas with heavier element-family enrichment.",
+  habitability: "Highlights stable enriched regions that could support rocky worlds or life potential."
+};
+
+const PRESET_TOOLTIPS: Record<PresetKey, string> = {
+  balanced: "A middle-ground dwarf-galaxy run with stable enrichment odds.",
+  gentle: "Lower chaos and better retention, useful for slower habitability development.",
+  dense: "Matter-rich conditions that collapse and enrich quickly.",
+  diffuse: "Spread-out conditions that make star formation harder.",
+  chaotic: "High turbulence, exotic matter, and disruption for unusual outcomes."
+};
+
+const METRIC_TOOLTIPS: Record<string, string> = {
+  Age: "Elapsed simulation time in the current run.",
+  Actual: "Measured simulation speed after frame-budget limits are applied.",
+  Limiter: "The active speed limiter keeping the browser responsive.",
+  Stars: "Packets currently or previously flagged as star-forming regions.",
+  "Active stars": "Star packets still burning instead of already spent or exploded.",
+  Supernovae: "Recorded stellar explosions that spread enriched material.",
+  "Rocky worlds": "Stable enriched regions counted as rocky-planet candidates.",
+  Habitables: "Rocky or enriched regions that reached the life-potential threshold.",
+  "Star yield": "Share of all packets that became star-forming.",
+  "Active ratio": "Share of star packets that are still active.",
+  "Rocky ratio": "Share of all packets counted as rocky-world candidates.",
+  "Life potential": "Share of all packets counted as habitability candidates.",
+  Metallicity: "Average heavy-element enrichment across the packet field.",
+  "Enriched matter": "Share of packets assigned to non-primordial element families.",
+  "Element complexity": "Average complexity of the element-family mix.",
+  Density: "Average local packet crowding.",
+  Heat: "Average packet temperature after cooling and energetic events.",
+  "Matter share": "Share of packets that are not radiation-like.",
+  "Escaped mass": "Estimated share of mass that has drifted outside the useful simulation volume.",
+  "Dominant species": "Most common proto-particle species in the current packet mix.",
+  "Dominant family": "Most common enriched element family in the current packet mix."
+};
+
+const LEGEND_TOOLTIPS: Record<string, string> = {
+  "Primordial matter": "Matter-like packets before strong enrichment.",
+  Radiation: "Radiation-like packets that resist early collapse.",
+  "Lepton haze": "Light charged packets that influence cooling and heat.",
+  "Star packet": "Packets that reached star-forming conditions.",
+  "Enriched metals": "Packets carrying heavier element-family material."
+};
 
 const emptyStats: SimStats = {
   stars: 0,
@@ -339,24 +397,32 @@ export function App() {
             <p>Dwarf-galaxy pocket universe / {summary.params.particleCount.toLocaleString()} packets</p>
           </div>
           <div className="readouts" aria-label="Simulation readouts">
-            <Readout label="Age" value={formatAge(summary.ageMyr)} />
-            <Readout label="Actual" value={`${Math.round(simRef.current.actualSpeed).toLocaleString()}x`} />
-            <Readout label="Limiter" value={simRef.current.limiter} />
+            <Readout label="Age" value={formatAge(summary.ageMyr)} tooltip={METRIC_TOOLTIPS.Age} />
+            <Readout label="Actual" value={`${Math.round(simRef.current.actualSpeed).toLocaleString()}x`} tooltip={METRIC_TOOLTIPS.Actual} />
+            <Readout label="Limiter" value={simRef.current.limiter} tooltip={METRIC_TOOLTIPS.Limiter} />
           </div>
         </div>
         <div className="legend">
-          <Legend color="#7ee7bf" label="Primordial matter" />
-          <Legend color="#5bc9ff" label="Radiation" />
-          <Legend color="#c49bff" label="Lepton haze" />
-          <Legend color="#f6d36c" label="Star packet" />
-          <Legend color="#ffb24a" label="Enriched metals" />
+          <Legend color="#7ee7bf" label="Primordial matter" tooltip={LEGEND_TOOLTIPS["Primordial matter"]} />
+          <Legend color="#5bc9ff" label="Radiation" tooltip={LEGEND_TOOLTIPS.Radiation} />
+          <Legend color="#c49bff" label="Lepton haze" tooltip={LEGEND_TOOLTIPS["Lepton haze"]} />
+          <Legend color="#f6d36c" label="Star packet" tooltip={LEGEND_TOOLTIPS["Star packet"]} />
+          <Legend color="#ffb24a" label="Enriched metals" tooltip={LEGEND_TOOLTIPS["Enriched metals"]} />
         </div>
       </section>
 
       <aside className="panel" aria-label="Simulation controls">
         <nav className="tabs" aria-label="Control sections" role="tablist">
           {(["run", "params", "library", "timeline"] as Tab[]).map((item) => (
-            <button key={item} className={tab === item ? "tab active" : "tab"} role="tab" aria-selected={tab === item} onClick={() => setTab(item)}>
+            <button
+              key={item}
+              className={tab === item ? "tab active has-tooltip" : "tab has-tooltip"}
+              role="tab"
+              aria-selected={tab === item}
+              onClick={() => setTab(item)}
+              data-tooltip={TAB_TOOLTIPS[item]}
+              title={TAB_TOOLTIPS[item]}
+            >
               {item}
             </button>
           ))}
@@ -365,23 +431,24 @@ export function App() {
         {tab === "run" && (
           <section className="tabpane active" role="tabpanel">
             <div className="control-row">
-              <IconButton icon={speedIndex === 0 ? Play : Pause} label={speedIndex === 0 ? "Play" : "Pause"} primary onClick={() => setSpeedIndex(speedIndex === 0 ? 1 : 0)} />
+              <IconButton icon={speedIndex === 0 ? Play : Pause} label={speedIndex === 0 ? "Play" : "Pause"} tooltip="Start or pause the simulation. Space does the same thing." primary onClick={() => setSpeedIndex(speedIndex === 0 ? 1 : 0)} />
               <IconButton
                 icon={SkipForward}
                 label="Step"
+                tooltip="Advance the simulation by one controlled step without playing continuously."
                 onClick={() => {
                   simRef.current.step(1, 0.8);
                   setSummary(simRef.current.getSummary());
                 }}
               />
-              <IconButton icon={RefreshCcw} label="Reset" onClick={() => regenerate(seed, params)} />
+              <IconButton icon={RefreshCcw} label="Reset" tooltip="Restart the current seed with the current parameters." onClick={() => regenerate(seed, params)} />
             </div>
-            <label className="field">
+            <label className="field has-tooltip" data-tooltip="Controls target simulation speed. Max mode runs as fast as the frame budget allows." title="Controls target simulation speed. Max mode runs as fast as the frame budget allows.">
               <span>Simulation speed</span>
               <input type="range" min="0" max={SPEEDS.length - 1} value={speedIndex} onChange={(event) => setSpeedIndex(Number(event.target.value))} />
               <output>{SPEEDS[speedIndex].label}</output>
             </label>
-            <label className="field">
+            <label className="field has-tooltip" data-tooltip={RENDER_MODE_TOOLTIPS[renderMode]} title={RENDER_MODE_TOOLTIPS[renderMode]}>
               <span>Render mode</span>
               <select value={renderMode} onChange={(event) => setRenderMode(event.target.value as RenderMode)}>
                 <option value="species">Species</option>
@@ -393,32 +460,32 @@ export function App() {
                 <option value="habitability">Habitability</option>
               </select>
             </label>
-            <div className="diagnostic">
+            <div className="diagnostic has-tooltip" data-tooltip="Plain-language summary of the current run's dominant outcome." title="Plain-language summary of the current run's dominant outcome.">
               <span>Outcome</span>
               <strong>{summary.diagnosis.title}</strong>
               <p>{summary.diagnosis.description}</p>
             </div>
             <div className="metric-grid">
               {metrics.map(([label, value]) => (
-                <Readout key={label} label={String(label)} value={typeof value === "number" ? value.toLocaleString() : String(value)} />
+                <Readout key={label} label={String(label)} value={typeof value === "number" ? value.toLocaleString() : String(value)} tooltip={METRIC_TOOLTIPS[String(label)]} />
               ))}
             </div>
-            <div className="species-panel">
+            <div className="species-panel has-tooltip" data-tooltip="Current distribution of proto-particle packet species." title="Current distribution of proto-particle packet species.">
               <span>Particle species</span>
               {speciesMix.map((item) => (
-                <div className="species-row" key={item.id}>
+                <div className="species-row has-tooltip" key={item.id} data-tooltip={`${item.label}: ${item.count.toLocaleString()} packets, ${item.percent}% of the field.`} title={`${item.label}: ${item.count.toLocaleString()} packets, ${item.percent}% of the field.`}>
                   <i className="dot" style={{ background: item.color }} />
                   <strong>{item.label}</strong>
                   <em>{item.percent}%</em>
                 </div>
               ))}
             </div>
-            <div className="species-panel">
+            <div className="species-panel has-tooltip" data-tooltip="Element-family mix produced by enrichment, loosely mirrored from periodic-table behavior." title="Element-family mix produced by enrichment, loosely mirrored from periodic-table behavior.">
               <span>Periodic-table mirror</span>
               {elementMix.map((item) => (
-                <div className="species-row" key={item.id}>
+                <div className="species-row has-tooltip" key={item.id} data-tooltip={`${item.label}: ${item.percent}% of packets. Mirrors ${item.mirror}.`} title={`${item.label}: ${item.percent}% of packets. Mirrors ${item.mirror}.`}>
                   <i className="dot" style={{ background: item.color }} />
-                  <strong title={item.mirror}>{item.label}</strong>
+                  <strong>{item.label}</strong>
                   <em>{item.percent}%</em>
                 </div>
               ))}
@@ -429,13 +496,13 @@ export function App() {
         {tab === "params" && (
           <section className="tabpane active" role="tabpanel">
             <div className="seed-row">
-              <label className="field">
+              <label className="field has-tooltip" data-tooltip="The deterministic seed. Same seed plus same parameters gives the same universe." title="The deterministic seed. Same seed plus same parameters gives the same universe.">
                 <span>Seed</span>
                 <input value={seed} onChange={(event) => setSeed(event.target.value)} autoComplete="off" />
               </label>
-              <IconButton icon={Shuffle} label="New" onClick={() => setSeed(makeSeed())} />
+              <IconButton icon={Shuffle} label="New" tooltip="Create a fresh random seed without changing the parameters yet." onClick={() => setSeed(makeSeed())} />
             </div>
-            <label className="field">
+            <label className="field has-tooltip" data-tooltip={PRESET_TOOLTIPS[preset]} title={PRESET_TOOLTIPS[preset]}>
               <span>Preset</span>
               <select
                 value={preset}
@@ -457,7 +524,7 @@ export function App() {
                 <ParamSlider key={def.key} def={def} value={params[def.key]} onChange={(value) => setParams((current) => normalizeParams({ ...current, [def.key]: value }))} />
               ))}
             </div>
-            <button className="primary full" onClick={() => regenerate(seed, params)}>
+            <button className="primary full has-tooltip" onClick={() => regenerate(seed, params)} data-tooltip="Build a new universe from the current seed and parameter values." title="Build a new universe from the current seed and parameter values.">
               <FastForward size={16} /> Generate Universe
             </button>
           </section>
@@ -466,13 +533,14 @@ export function App() {
         {tab === "library" && (
           <section className="tabpane active" role="tabpanel">
             <div className="library-actions">
-              <IconButton icon={Save} label="Save" primary onClick={saveCurrent} />
-              <IconButton icon={Copy} label="Fork" onClick={() => regenerate(`${seed}-fork-${Math.floor(Math.random() * 999)}`, params)} />
-              <IconButton icon={Download} label="Export" onClick={exportLibrary} />
-              <IconButton icon={Upload} label="Import" onClick={() => fileRef.current?.click()} />
+              <IconButton icon={Save} label="Save" tooltip="Save the current seed, parameters, and outcome in this browser." primary onClick={saveCurrent} />
+              <IconButton icon={Copy} label="Fork" tooltip="Create a related seed from the current one and regenerate it." onClick={() => regenerate(`${seed}-fork-${Math.floor(Math.random() * 999)}`, params)} />
+              <IconButton icon={Download} label="Export" tooltip="Download the saved seed library as a JSON backup." onClick={exportLibrary} />
+              <IconButton icon={Upload} label="Import" tooltip="Import a previously exported seed library JSON file." onClick={() => fileRef.current?.click()} />
               <IconButton
                 icon={Trash2}
                 label="Clear"
+                tooltip="Remove all locally saved seeds from this browser."
                 onClick={() => {
                   if (!library.length) return showStatus("Seed library is already empty.");
                   if (window.confirm("Clear the entire local seed library? Export first if you need a backup.")) setLibrary([]);
@@ -486,15 +554,15 @@ export function App() {
                 <article key={item.id} className={item.seed === summary.seed ? "seed-card active" : "seed-card"}>
                   <header>
                     <div>
-                      <input className="title-input" value={item.title} onChange={(event) => updateSavedSeed(item.id, { title: event.target.value }, setLibrary)} />
+                      <input className="title-input" value={item.title} onChange={(event) => updateSavedSeed(item.id, { title: event.target.value }, setLibrary)} title="Edit this saved seed title." />
                       <p>{item.seed} / {formatAge(item.outcome.ageMyr)} / {item.outcome.diagnosis.title}</p>
                     </div>
                   </header>
-                  <textarea value={item.description} onChange={(event) => updateSavedSeed(item.id, { description: event.target.value }, setLibrary)} />
+                  <textarea value={item.description} onChange={(event) => updateSavedSeed(item.id, { description: event.target.value }, setLibrary)} title="Edit notes for this saved seed." />
                   <div className="seed-actions">
-                    <button onClick={() => loadSavedSeed(item)}><FolderOpen size={15} /> Load</button>
-                    <button onClick={() => setLibrary((items) => [{ ...item, id: crypto.randomUUID(), seed: `${item.seed}-copy`, title: `${item.title} Copy` }, ...items])}><Copy size={15} /> Copy</button>
-                    <button onClick={() => window.confirm(`Delete "${item.title}" from the seed library?`) && setLibrary((items) => items.filter((entry) => entry.id !== item.id))}><Trash2 size={15} /> Delete</button>
+                    <button className="has-tooltip" data-tooltip="Load this saved seed and its parameters into the simulator." title="Load this saved seed and its parameters into the simulator." onClick={() => loadSavedSeed(item)}><FolderOpen size={15} /> Load</button>
+                    <button className="has-tooltip" data-tooltip="Duplicate this saved seed entry in the library." title="Duplicate this saved seed entry in the library." onClick={() => setLibrary((items) => [{ ...item, id: crypto.randomUUID(), seed: `${item.seed}-copy`, title: `${item.title} Copy` }, ...items])}><Copy size={15} /> Copy</button>
+                    <button className="has-tooltip" data-tooltip="Delete this saved seed from local storage." title="Delete this saved seed from local storage." onClick={() => window.confirm(`Delete "${item.title}" from the seed library?`) && setLibrary((items) => items.filter((entry) => entry.id !== item.id))}><Trash2 size={15} /> Delete</button>
                   </div>
                 </article>
               ))}
@@ -939,7 +1007,7 @@ function applyVariantTint(color: THREE.Color, variant: UniverseSimulation["parti
 function ParamSlider({ def, value, onChange }: { def: ParamDef; value: number; onChange: (value: number) => void }) {
   const [min, max] = PARAM_LIMITS[def.key];
   return (
-    <label className="param">
+    <label className="param has-tooltip" data-tooltip={def.tooltip} title={def.tooltip}>
       <span className="param-label">
         <strong>{def.label}</strong>
         <span><em>{formatParamValue(value, def.suffix)}</em><small>{def.group}</small></span>
@@ -949,20 +1017,24 @@ function ParamSlider({ def, value, onChange }: { def: ParamDef; value: number; o
   );
 }
 
-function IconButton({ icon: Icon, label, primary, onClick }: { icon: typeof Play; label: string; primary?: boolean; onClick: () => void }) {
-  return <button className={primary ? "primary icon-button" : "icon-button"} onClick={onClick}><Icon size={16} /> {label}</button>;
+function IconButton({ icon: Icon, label, tooltip, primary, onClick }: { icon: typeof Play; label: string; tooltip?: string; primary?: boolean; onClick: () => void }) {
+  return (
+    <button className={primary ? "primary icon-button has-tooltip" : "icon-button has-tooltip"} onClick={onClick} data-tooltip={tooltip} title={tooltip}>
+      <Icon size={16} /> {label}
+    </button>
+  );
 }
 
-function Readout({ label, value }: { label: string; value: string | number }) {
-  return <div className="readout"><span>{label}</span><strong>{value}</strong></div>;
+function Readout({ label, value, tooltip }: { label: string; value: string | number; tooltip?: string }) {
+  return <div className="readout has-tooltip" data-tooltip={tooltip} title={tooltip}><span>{label}</span><strong>{value}</strong></div>;
 }
 
-function Legend({ color, label }: { color: string; label: string }) {
-  return <span className="legend-item"><i className="dot" style={{ background: color }} />{label}</span>;
+function Legend({ color, label, tooltip }: { color: string; label: string; tooltip?: string }) {
+  return <span className="legend-item has-tooltip" data-tooltip={tooltip} title={tooltip}><i className="dot" style={{ background: color }} />{label}</span>;
 }
 
 function TimelineEvent({ event }: { event: SimEvent }) {
-  return <article className="event"><header><h3>{event.title}</h3><time>{formatAge(event.ageMyr)}</time></header><p>{event.description}</p></article>;
+  return <article className="event has-tooltip" data-tooltip="A major event recorded by the simulation timeline." title="A major event recorded by the simulation timeline."><header><h3>{event.title}</h3><time>{formatAge(event.ageMyr)}</time></header><p>{event.description}</p></article>;
 }
 
 function loadLibrary(): SavedSeed[] {
