@@ -1,14 +1,17 @@
 :root {
   color-scheme: dark;
-  --bg: #0b0e12;
-  --panel: #151a20;
-  --panel-2: #202833;
-  --panel-3: #0f141a;
-  --line: #34404d;
-  --text: #eef2f5;
-  --muted: #9aa7b5;
+  --bg: #080b0f;
+  --panel: #141a21;
+  --panel-2: #1d2630;
+  --panel-3: #0d1218;
+  --line: #2f3a47;
+  --line-soft: rgba(255, 255, 255, 0.08);
+  --text: #f3f6f8;
+  --muted: #9ba9b8;
+  --muted-2: #6f7e8e;
   --accent: #42d69b;
-  --accent-2: #f2b84b;
+  --accent-2: #7ec8ff;
+  --gold: #f2b84b;
   --danger: #e05c57;
   --shadow: 0 18px 50px rgba(0, 0, 0, 0.36);
   --radius: 8px;
@@ -22,8 +25,14 @@
 body {
   margin: 0;
   min-height: 100vh;
-  background: #070a0d;
+  background: #05070a;
   color: var(--text);
+  text-rendering: geometricPrecision;
+}
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #405060 #0c1117;
 }
 
 button,
@@ -38,7 +47,7 @@ select,
 input,
 textarea {
   border: 1px solid var(--line);
-  background: #0f141a;
+  background: #0c1218;
   color: var(--text);
   border-radius: var(--radius);
 }
@@ -51,8 +60,12 @@ button {
 }
 
 button:hover {
-  border-color: #657485;
-  background: #151c24;
+  border-color: #617284;
+  background: #151d26;
+}
+
+button:active {
+  transform: translateY(1px);
 }
 
 button:focus-visible,
@@ -64,11 +77,11 @@ textarea:focus-visible {
 }
 
 button.primary {
-  background: linear-gradient(180deg, #4ce1a8, #31c486);
+  background: linear-gradient(180deg, #57e5ae 0%, #36c98f 48%, #25ad76 100%);
   color: #06110c;
   border-color: #5fe7b4;
   font-weight: 750;
-  box-shadow: 0 8px 22px rgba(66, 214, 155, 0.18);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.28), 0 8px 22px rgba(66, 214, 155, 0.18);
 }
 
 .has-tooltip {
@@ -146,7 +159,7 @@ button.primary {
 
 .app-shell {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 420px;
+  grid-template-columns: minmax(0, 1fr) 430px;
   height: 100vh;
   overflow: hidden;
 }
@@ -155,19 +168,44 @@ button.primary {
   position: relative;
   min-width: 0;
   background:
-    radial-gradient(circle at 28% 32%, rgba(91, 201, 255, 0.13), transparent 32%),
-    radial-gradient(circle at 70% 58%, rgba(66, 214, 155, 0.1), transparent 34%),
+    radial-gradient(circle at 22% 30%, rgba(126, 200, 255, 0.12), transparent 28%),
+    radial-gradient(circle at 68% 62%, rgba(66, 214, 155, 0.1), transparent 30%),
+    radial-gradient(circle at 48% 46%, rgba(242, 184, 75, 0.055), transparent 24%),
+    radial-gradient(circle at 18% 84%, rgba(196, 155, 255, 0.055), transparent 22%),
     #05070a;
+  overflow: hidden;
 }
 
 .viewport::after {
   content: "";
   position: absolute;
   inset: 0;
+  z-index: 1;
   pointer-events: none;
   background:
-    linear-gradient(90deg, rgba(5, 7, 10, 0.38), transparent 20%, transparent 76%, rgba(5, 7, 10, 0.18)),
-    linear-gradient(180deg, rgba(5, 7, 10, 0.18), transparent 24%, rgba(5, 7, 10, 0.22));
+    radial-gradient(circle at 13% 23%, rgba(255, 255, 255, 0.34) 0 1px, transparent 1.6px),
+    radial-gradient(circle at 33% 67%, rgba(126, 200, 255, 0.18) 0 1px, transparent 1.8px),
+    radial-gradient(circle at 72% 18%, rgba(255, 255, 255, 0.22) 0 1px, transparent 1.6px),
+    radial-gradient(circle at 58% 76%, rgba(255, 255, 255, 0.18) 0 1px, transparent 1.8px),
+    linear-gradient(rgba(126, 200, 255, 0.025) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(126, 200, 255, 0.025) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(5, 7, 10, 0.46), transparent 24%, transparent 76%, rgba(5, 7, 10, 0.2)),
+    linear-gradient(180deg, rgba(5, 7, 10, 0.2), transparent 25%, rgba(5, 7, 10, 0.3));
+  background-size: auto, auto, auto, auto, 96px 96px, 96px 96px, auto, auto;
+}
+
+.viewport::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  background-image:
+    radial-gradient(rgba(255, 255, 255, 0.28) 0.8px, transparent 0.9px),
+    radial-gradient(rgba(126, 200, 255, 0.18) 0.8px, transparent 0.9px);
+  background-position: 0 0, 47px 31px;
+  background-size: 94px 94px, 128px 128px;
+  opacity: 0.5;
 }
 
 .universe-canvas {
@@ -184,16 +222,18 @@ button.primary {
   display: flex;
   justify-content: space-between;
   gap: 18px;
-  z-index: 1;
-  padding: 20px 22px;
+  z-index: 2;
+  align-items: flex-start;
+  padding: 22px 24px;
   pointer-events: none;
 }
 
 h1 {
   margin: 0;
-  font-size: clamp(25px, 3vw, 44px);
-  font-weight: 780;
+  font-size: clamp(27px, 3.1vw, 46px);
+  font-weight: 820;
   letter-spacing: 0;
+  text-shadow: 0 18px 42px rgba(0, 0, 0, 0.58);
 }
 
 .topbar p {
@@ -204,19 +244,20 @@ h1 {
 
 .readouts {
   display: grid;
-  grid-template-columns: repeat(3, minmax(78px, 1fr));
+  grid-template-columns: repeat(3, minmax(92px, 1fr));
   gap: 8px;
   align-self: start;
+  width: min(360px, 42vw);
   pointer-events: auto;
 }
 
 .readout {
-  background: rgba(12, 16, 21, 0.82);
-  border: 1px solid rgba(255, 255, 255, 0.13);
+  background: linear-gradient(180deg, rgba(17, 23, 31, 0.9), rgba(10, 14, 19, 0.82));
+  border: 1px solid rgba(255, 255, 255, 0.12);
   border-radius: var(--radius);
-  padding: 9px 11px;
+  padding: 9px 10px;
   min-width: 0;
-  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.2);
+  box-shadow: inset 2px 0 0 rgba(126, 200, 255, 0.28), 0 12px 32px rgba(0, 0, 0, 0.22);
 }
 
 .readout.has-tooltip[data-tooltip]:hover::after,
@@ -245,28 +286,30 @@ h1 {
 .readout strong {
   display: block;
   margin-top: 3px;
-  font-size: 16px;
+  font-size: 17px;
+  line-height: 1.05;
   overflow-wrap: anywhere;
 }
 
 .legend {
   position: absolute;
   left: 18px;
-  bottom: 18px;
+  bottom: 17px;
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
   max-width: calc(100% - 36px);
-  z-index: 1;
+  z-index: 2;
 }
 
 .legend-item {
   display: inline-flex;
   align-items: center;
   gap: 7px;
-  padding: 6px 8px;
+  padding: 6px 9px;
   border: 1px solid rgba(255, 255, 255, 0.16);
-  background: rgba(10, 13, 17, 0.78);
+  background: rgba(10, 13, 17, 0.84);
+  backdrop-filter: blur(8px);
   border-radius: var(--radius);
   color: var(--muted);
   font-size: 12px;
@@ -282,7 +325,9 @@ h1 {
   min-width: 0;
   height: 100vh;
   overflow: auto;
-  background: linear-gradient(180deg, #171d24, #12171d);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.025), transparent 180px),
+    linear-gradient(180deg, #161d25, #10161d);
   border-left: 1px solid var(--line);
   box-shadow: -18px 0 46px rgba(0, 0, 0, 0.22);
 }
@@ -293,8 +338,11 @@ h1 {
   z-index: 30;
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  background: rgba(21, 26, 32, 0.96);
+  padding: 0 10px;
+  gap: 4px;
+  background: rgba(17, 23, 30, 0.96);
   border-bottom: 1px solid var(--line);
+  backdrop-filter: blur(10px);
 }
 
 .tab {
@@ -303,13 +351,14 @@ h1 {
   background: transparent;
   color: var(--muted);
   text-transform: capitalize;
-  min-height: 42px;
+  min-height: 44px;
+  font-size: 15px;
 }
 
 .tab.active {
   color: var(--text);
-  background: #202833;
-  box-shadow: inset 0 -2px 0 var(--accent);
+  background: linear-gradient(180deg, rgba(126, 200, 255, 0.11), rgba(66, 214, 155, 0.07));
+  box-shadow: inset 0 -2px 0 var(--accent), inset 0 1px 0 rgba(255, 255, 255, 0.08);
 }
 
 .tab.has-tooltip[data-tooltip]:hover::after,
@@ -359,7 +408,7 @@ h1 {
 }
 
 .tabpane {
-  padding: 18px 16px;
+  padding: 18px 16px 24px;
 }
 
 .control-row,
@@ -394,37 +443,65 @@ textarea {
   width: 100%;
   min-height: 36px;
   padding: 9px 11px;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.03);
 }
 
 input[type="range"] {
+  height: 20px;
   padding: 0;
   accent-color: #8bc5ff;
+  background: transparent;
+  border: 0;
+  box-shadow: none;
 }
 
 output {
-  color: var(--accent-2);
+  color: var(--gold);
   font-weight: 750;
+  letter-spacing: 0;
 }
 
 .metric-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: 10px;
-  margin-top: 14px;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.metric-grid .readout:nth-child(-n+5) {
+  box-shadow: inset 2px 0 0 rgba(66, 214, 155, 0.38), 0 10px 26px rgba(0, 0, 0, 0.18);
+}
+
+.metric-grid .readout:nth-child(6),
+.metric-grid .readout:nth-child(9),
+.metric-grid .readout:nth-child(11) {
+  box-shadow: inset 2px 0 0 rgba(242, 184, 75, 0.42), 0 10px 26px rgba(0, 0, 0, 0.18);
+}
+
+.readout:hover,
+.diagnostic:hover,
+.species-panel:hover,
+.seed-card:hover,
+.event:hover {
+  border-color: rgba(126, 200, 255, 0.28);
 }
 
 .diagnostic {
   margin: 14px 0;
-  padding: 13px;
+  padding: 14px;
   border: 1px solid var(--line);
-  background: linear-gradient(180deg, #101820, #0d1218);
+  background:
+    linear-gradient(135deg, rgba(126, 200, 255, 0.08), transparent 38%),
+    linear-gradient(180deg, #101820, #0c1117);
   border-radius: var(--radius);
+  box-shadow: inset 2px 0 0 rgba(66, 214, 155, 0.42);
 }
 
 .diagnostic strong {
   display: block;
   margin-top: 3px;
-  font-size: 17px;
+  font-size: 18px;
+  line-height: 1.15;
 }
 
 .diagnostic p {
@@ -438,9 +515,9 @@ output {
   display: grid;
   gap: 8px;
   margin-top: 12px;
-  padding: 13px;
+  padding: 12px 13px;
   border: 1px solid var(--line);
-  background: linear-gradient(180deg, #111820, #0d1218);
+  background: linear-gradient(180deg, #101820, #0c1117);
   border-radius: var(--radius);
 }
 
@@ -455,7 +532,7 @@ output {
   align-items: center;
   gap: 8px;
   min-height: 22px;
-  padding: 2px 0;
+  padding: 3px 0;
 }
 
 .species-row strong {
@@ -464,7 +541,7 @@ output {
 }
 
 .species-row em {
-  color: var(--accent-2);
+  color: var(--gold);
   font-size: 12px;
   font-style: normal;
 }
@@ -482,8 +559,8 @@ output {
 }
 
 .param {
-  padding: 13px 0;
-  border-bottom: 1px solid var(--line);
+  padding: 13px 0 14px;
+  border-bottom: 1px solid var(--line-soft);
 }
 
 .param-label {
@@ -499,7 +576,7 @@ output {
 }
 
 .param-label em {
-  color: var(--accent-2);
+  color: var(--gold);
   font-style: normal;
   font-size: 12px;
 }
@@ -518,9 +595,9 @@ output {
 .seed-card,
 .event {
   border: 1px solid var(--line);
-  background: linear-gradient(180deg, #121820, #0f141a);
+  background: linear-gradient(180deg, #121a22, #0e141a);
   border-radius: var(--radius);
-  padding: 10px;
+  padding: 11px;
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
 }
 
@@ -571,7 +648,7 @@ output {
 }
 
 .event time {
-  color: var(--accent-2);
+  color: var(--gold);
   font-size: 12px;
   white-space: nowrap;
 }
@@ -642,6 +719,7 @@ output {
 @media (max-width: 560px) {
   .topbar {
     padding: 14px;
+    gap: 12px;
   }
 
   .has-tooltip[data-tooltip]:hover::after,
@@ -672,7 +750,19 @@ output {
     max-width: calc(100vw - 24px);
   }
 
-  .readouts,
+  .readouts {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    width: 100%;
+  }
+
+  .readout {
+    padding: 8px;
+  }
+
+  .readout strong {
+    font-size: 15px;
+  }
+
   .metric-grid {
     grid-template-columns: 1fr;
   }
