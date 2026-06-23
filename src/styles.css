@@ -101,6 +101,15 @@ button.primary {
   white-space: normal;
 }
 
+.panel .has-tooltip[data-tooltip]:hover::after,
+.panel .has-tooltip[data-tooltip]:focus-visible::after,
+.panel .has-tooltip[data-tooltip]:focus-within::after {
+  left: auto;
+  right: 0;
+  max-width: min(300px, calc(100vw - 32px), calc(100% + 140px));
+  transform: none;
+}
+
 .has-tooltip[data-tooltip]:hover::before,
 .has-tooltip[data-tooltip]:focus-visible::before,
 .has-tooltip[data-tooltip]:focus-within::before {
@@ -116,6 +125,14 @@ button.primary {
   border-bottom: 1px solid rgba(255, 255, 255, 0.15);
   transform: translateX(-50%) rotate(45deg);
   pointer-events: none;
+}
+
+.panel .has-tooltip[data-tooltip]:hover::before,
+.panel .has-tooltip[data-tooltip]:focus-visible::before,
+.panel .has-tooltip[data-tooltip]:focus-within::before {
+  left: auto;
+  right: 18px;
+  transform: rotate(45deg);
 }
 
 .icon-button,
@@ -299,13 +316,46 @@ h1 {
 .tab.has-tooltip[data-tooltip]:focus-visible::after {
   top: calc(100% + 9px);
   bottom: auto;
+  left: 50%;
+  right: auto;
+  transform: translateX(-50%);
 }
 
 .tab.has-tooltip[data-tooltip]:hover::before,
 .tab.has-tooltip[data-tooltip]:focus-visible::before {
   top: calc(100% + 4px);
   bottom: auto;
+  left: 50%;
+  right: auto;
   transform: translateX(-50%) rotate(225deg);
+}
+
+.tab:first-child.has-tooltip[data-tooltip]:hover::after,
+.tab:first-child.has-tooltip[data-tooltip]:focus-visible::after {
+  left: 8px;
+  right: auto;
+  transform: none;
+}
+
+.tab:first-child.has-tooltip[data-tooltip]:hover::before,
+.tab:first-child.has-tooltip[data-tooltip]:focus-visible::before {
+  left: 28px;
+  right: auto;
+  transform: rotate(225deg);
+}
+
+.tab:last-child.has-tooltip[data-tooltip]:hover::after,
+.tab:last-child.has-tooltip[data-tooltip]:focus-visible::after {
+  left: auto;
+  right: 8px;
+  transform: none;
+}
+
+.tab:last-child.has-tooltip[data-tooltip]:hover::before,
+.tab:last-child.has-tooltip[data-tooltip]:focus-visible::before {
+  left: auto;
+  right: 28px;
+  transform: rotate(225deg);
 }
 
 .tabpane {
@@ -592,6 +642,34 @@ output {
 @media (max-width: 560px) {
   .topbar {
     padding: 14px;
+  }
+
+  .has-tooltip[data-tooltip]:hover::after,
+  .has-tooltip[data-tooltip]:focus-visible::after,
+  .has-tooltip[data-tooltip]:focus-within::after,
+  .panel .has-tooltip[data-tooltip]:hover::after,
+  .panel .has-tooltip[data-tooltip]:focus-visible::after,
+  .panel .has-tooltip[data-tooltip]:focus-within::after {
+    left: 0;
+    right: auto;
+    max-width: calc(100vw - 32px);
+    transform: none;
+  }
+
+  .has-tooltip[data-tooltip]:hover::before,
+  .has-tooltip[data-tooltip]:focus-visible::before,
+  .has-tooltip[data-tooltip]:focus-within::before,
+  .panel .has-tooltip[data-tooltip]:hover::before,
+  .panel .has-tooltip[data-tooltip]:focus-visible::before,
+  .panel .has-tooltip[data-tooltip]:focus-within::before {
+    left: 18px;
+    right: auto;
+    transform: rotate(45deg);
+  }
+
+  .tab.has-tooltip[data-tooltip]:hover::after,
+  .tab.has-tooltip[data-tooltip]:focus-visible::after {
+    max-width: calc(100vw - 24px);
   }
 
   .readouts,
