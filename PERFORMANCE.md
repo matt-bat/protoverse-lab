@@ -8,7 +8,7 @@ This file tracks the practical performance limits of the current browser version
 
 - The simulation still runs on the browser main thread, alongside React, Three.js, input, and layout.
 - Particles are stored as regular objects. That is easy to work with, but typed arrays would be faster and easier to transfer to a worker.
-- Rendering uploads position and color buffers on a capped visual cadence. That works well for the 8,000-packet default, but very high counts still scale linearly.
+- Rendering uploads position and color buffers on a capped visual cadence. That works well for the 8,000-packet default, but high counts still scale linearly.
 - Enrichment and event logic is branch-heavy. That is fine in JavaScript for now, but it is not a clean first target for GPU compute.
 
 ## Measurements
@@ -33,7 +33,7 @@ After frame caps, buffer reuse, render sampling, and camera/containment tuning:
 | 52,000 | 104.37 | 23.34 | 28.76 |
 | 100,000 | 289.89 | 70.37 | 50.42 |
 
-The default browser run is now 8,000 packets. A Playwright cadence check measured about 59fps while the sim was running, which clears the 30fps target with room to spare.
+The default browser run is now 8,000 packets, and the public UI caps runs at 60,000 packets until simulation stepping moves off the main thread. A Playwright cadence check measured about 59fps while the sim was running, which clears the 30fps target with room to spare.
 
 ## What Has Already Been Tuned
 
@@ -68,4 +68,3 @@ The default browser run is now 8,000 packets. A Playwright cadence check measure
 4. Consider GPU work only after the typed-array rewrite.
    - GPU.js or WebGPU may help with grid/fabric kernels later.
    - The current event and enrichment rules should stay on CPU until the state model is cleaner.
-

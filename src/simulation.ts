@@ -466,7 +466,7 @@ export const DEFAULT_PARAMS: SimParams = {
 export const PARAM_LIMITS: Record<keyof SimParams, [number, number]> = {
   universeSizeLy: [2000, 30000],
   totalMassSolar: [100_000_000, 3_000_000_000],
-  particleCount: [1000, 250_000],
+  particleCount: [1000, 60_000],
   expansionRate: [0.1, 1.2],
   initialTemperature: [0.2, 1.4],
   matterDensity: [0.15, 1.2],

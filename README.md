@@ -6,7 +6,7 @@ Protoverse Lab is a seeded universe-evolution sandbox built with React, TypeScri
 
 This is not meant to be a literal physics engine. The simulation uses coarse packets that stand in for matter, radiation, proto-particles, enriched material, and habitability potential. The goal is to make the chain from early packets to stars, enrichment, rocky worlds, and life-capable regions understandable and interactive.
 
-The default run starts with 8,000 packets so movement and camera controls stay smooth. Higher counts are available in the controls for stronger machines.
+The default run starts with 8,000 packets so movement and camera controls stay smooth. Higher counts are available up to 60,000 packets for stronger machines.
 
 ## What It Does
 
@@ -17,7 +17,7 @@ The default run starts with 8,000 packets so movement and camera controls stay s
 - Shows metrics for stars, supernovae, rocky worlds, habitability, enrichment, density, heat, dominant species, and dominant element family
 - Renders the universe with WebGL shader particles, glow layers, adaptive sampling, and star/enrichment highlights
 - Saves seeds locally, with editable titles and descriptions
-- Imports and exports seed libraries as JSON
+- Imports and exports seed libraries as JSON, with a 1.5 MB import limit to keep the browser responsive
 
 ## Stack
 

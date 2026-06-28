@@ -19,6 +19,7 @@ Protoverse Lab was created by Matthew Bateman. Use this checklist before pushing
 - [ ] Try all presets.
 - [ ] Switch through every render mode while the sim is running.
 - [ ] Save, edit, load, fork, export, clear, and import a seed library.
+- [ ] Oversized seed-library imports are rejected cleanly before parsing.
 - [ ] Make sure old localStorage seed libraries either load or fail gracefully.
 
 ## Simulation Checks
@@ -28,7 +29,7 @@ Protoverse Lab was created by Matthew Bateman. Use this checklist before pushing
 - [ ] The default run holds at least 30fps on the target machine.
 - [ ] Camera pan, orbit, and zoom stay responsive while running.
 - [ ] `Max Frame-Budgeted` speeds things up without freezing the tab.
-- [ ] High particle counts remain recoverable thanks to adaptive visual sampling.
+- [ ] High particle counts remain recoverable within the public 60,000-packet cap.
 
 ## Visual Checks
 

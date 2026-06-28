@@ -62,6 +62,7 @@ const STORAGE_KEY = "cosmic-seed-sim.library.v2";
 const APP_NAME = "Protoverse Lab";
 const DENSITY_GRID_SIZE = 10;
 const DENSITY_CELL_COUNT = DENSITY_GRID_SIZE * DENSITY_GRID_SIZE * DENSITY_GRID_SIZE;
+const MAX_IMPORT_BYTES = 1_500_000;
 
 const particleVertexShader = `
 attribute float aSize;
@@ -362,6 +363,11 @@ export function App() {
 
   const importLibrary = async (file: File | undefined) => {
     if (!file) return;
+    if (file.size > MAX_IMPORT_BYTES) {
+      showStatus("Import file is too large. Keep seed libraries under 1.5 MB.");
+      if (fileRef.current) fileRef.current.value = "";
+      return;
+    }
     try {
       const parsed = JSON.parse(await file.text());
       const incoming = sanitizeLibrary(Array.isArray(parsed) ? parsed : parsed.seeds);
@@ -369,6 +375,8 @@ export function App() {
       showStatus(`Imported ${incoming.length} seed${incoming.length === 1 ? "" : "s"}.`);
     } catch {
       showStatus("Import failed. Choose a valid seed library JSON file.");
+    } finally {
+      if (fileRef.current) fileRef.current.value = "";
     }
   };
 

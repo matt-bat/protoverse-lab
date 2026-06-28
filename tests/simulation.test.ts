@@ -31,7 +31,7 @@ function compact(summary: SimSummary) {
 describe("UniverseSimulation", () => {
   it("normalizes unsafe parameter input", () => {
     expect(normalizeParams({ particleCount: -1 }).particleCount).toBe(1000);
-    expect(normalizeParams({ particleCount: 300000 }).particleCount).toBe(250000);
+    expect(normalizeParams({ particleCount: 300000 }).particleCount).toBe(60000);
     expect(DEFAULT_PARAMS.particleCount).toBeLessThanOrEqual(30000);
   });
 
