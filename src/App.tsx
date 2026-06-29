@@ -58,23 +58,35 @@ type ParamDef = {
   tooltip: string;
 };
 
+type LegendGlyph = "disc" | "speck" | "ring" | "diamond" | "cross";
+
+type LegendItemDef = {
+  color: string;
+  label: string;
+  tooltip: string;
+  glyph: LegendGlyph;
+};
+
 const STORAGE_KEY = "cosmic-seed-sim.library.v2";
 const APP_NAME = "Protoverse Lab";
-const DENSITY_GRID_SIZE = 10;
+const DENSITY_GRID_SIZE = 14;
 const DENSITY_CELL_COUNT = DENSITY_GRID_SIZE * DENSITY_GRID_SIZE * DENSITY_GRID_SIZE;
 const MAX_IMPORT_BYTES = 1_500_000;
 
 const particleVertexShader = `
 attribute float aSize;
 attribute float aAlpha;
+attribute float aShape;
 varying vec3 vColor;
 varying float vAlpha;
+varying float vShape;
 
 void main() {
   vColor = color;
   vAlpha = aAlpha;
+  vShape = aShape;
   vec4 mvPosition = modelViewMatrix * vec4(position, 1.0);
-  gl_PointSize = aSize * (180.0 / max(24.0, -mvPosition.z));
+  gl_PointSize = aSize * (210.0 / max(24.0, -mvPosition.z));
   gl_Position = projectionMatrix * mvPosition;
 }
 `;
@@ -82,14 +94,40 @@ void main() {
 const particleFragmentShader = `
 varying vec3 vColor;
 varying float vAlpha;
+varying float vShape;
 
 void main() {
   vec2 uv = gl_PointCoord - vec2(0.5);
   float radius = length(uv);
   if (radius > 0.5) discard;
-  float core = smoothstep(0.5, 0.06, radius);
-  float halo = smoothstep(0.5, 0.0, radius) * 0.34;
-  gl_FragColor = vec4(vColor * (0.55 + core * 0.7), (core + halo) * vAlpha);
+  float alpha = 0.0;
+  float gain = 1.0;
+  if (vShape < 0.5) {
+    float core = smoothstep(0.42, 0.04, radius);
+    float halo = smoothstep(0.5, 0.16, radius) * 0.16;
+    alpha = core + halo;
+    gain = 0.65 + core * 0.72;
+  } else if (vShape < 1.5) {
+    float core = smoothstep(0.32, 0.035, radius);
+    alpha = core;
+    gain = 1.16;
+  } else if (vShape < 2.5) {
+    float ring = smoothstep(0.48, 0.38, radius) * smoothstep(0.22, 0.34, radius);
+    float core = smoothstep(0.12, 0.02, radius) * 0.35;
+    alpha = max(ring, core);
+    gain = 1.26;
+  } else if (vShape < 3.5) {
+    float diamond = abs(uv.x) + abs(uv.y);
+    alpha = smoothstep(0.48, 0.36, diamond);
+    gain = 1.18;
+  } else {
+    float cross = max(smoothstep(0.09, 0.035, abs(uv.x)), smoothstep(0.09, 0.035, abs(uv.y)));
+    alpha = cross * smoothstep(0.5, 0.28, radius);
+    gain = 1.32;
+  }
+  float grain = fract(sin(dot(gl_PointCoord.xy + vec2(vShape * 0.17, vAlpha * 0.11), vec2(18.9898, 67.345))) * 24634.6345);
+  alpha *= 0.82 + grain * 0.22;
+  gl_FragColor = vec4(vColor * gain, alpha * vAlpha);
 }
 `;
 
@@ -228,6 +266,54 @@ const LEGEND_TOOLTIPS: Record<string, string> = {
   "Lepton haze": "Light charged packets that influence cooling and heat.",
   "Star packet": "Packets that reached star-forming conditions.",
   "Enriched metals": "Packets carrying heavier element-family material."
+};
+
+const VIEW_LEGENDS: Record<RenderMode, LegendItemDef[]> = {
+  composition: [
+    { color: "#7ee7bf", label: "Primordial matter", tooltip: LEGEND_TOOLTIPS["Primordial matter"], glyph: "speck" },
+    { color: "#5bc9ff", label: "Radiation rings", tooltip: LEGEND_TOOLTIPS.Radiation, glyph: "ring" },
+    { color: "#c49bff", label: "Lepton crosses", tooltip: LEGEND_TOOLTIPS["Lepton haze"], glyph: "cross" },
+    { color: "#f6d36c", label: "Star packets", tooltip: LEGEND_TOOLTIPS["Star packet"], glyph: "ring" },
+    { color: "#ffb24a", label: "Enriched metals", tooltip: LEGEND_TOOLTIPS["Enriched metals"], glyph: "diamond" }
+  ],
+  species: [
+    { color: SPECIES_TRAITS.baryon.color, label: "Baryon specks", tooltip: "Matter-building packets with stronger collapse behavior.", glyph: "speck" },
+    { color: SPECIES_TRAITS.radiant.color, label: "Radiant rings", tooltip: "Radiation-like packets that push against early collapse.", glyph: "ring" },
+    { color: SPECIES_TRAITS.neutral.color, label: "Neutral diamonds", tooltip: "Cooler, quieter packets that help clouds settle.", glyph: "diamond" },
+    { color: SPECIES_TRAITS.lepton.color, label: "Lepton crosses", tooltip: "Light charged packets tied to cooling and heat exchange.", glyph: "cross" },
+    { color: SPECIES_TRAITS.exotic.color, label: "Exotic crosses", tooltip: "Unusual packets that add turbulence and instability.", glyph: "cross" }
+  ],
+  elements: [
+    { color: ELEMENT_FAMILY_TRAITS.primordial.color, label: "H/He-like", tooltip: ELEMENT_FAMILY_TRAITS.primordial.periodicMirror, glyph: "speck" },
+    { color: ELEMENT_FAMILY_TRAITS.alkalineEarthLike.color, label: "Rock builders", tooltip: ELEMENT_FAMILY_TRAITS.alkalineEarthLike.periodicMirror, glyph: "ring" },
+    { color: ELEMENT_FAMILY_TRAITS.transitionLike.color, label: "Metal cores", tooltip: ELEMENT_FAMILY_TRAITS.transitionLike.periodicMirror, glyph: "diamond" },
+    { color: ELEMENT_FAMILY_TRAITS.nonmetalLike.color, label: "CHON chemistry", tooltip: ELEMENT_FAMILY_TRAITS.nonmetalLike.periodicMirror, glyph: "cross" },
+    { color: ELEMENT_FAMILY_TRAITS.actinideLike.color, label: "Heavy analogs", tooltip: ELEMENT_FAMILY_TRAITS.actinideLike.periodicMirror, glyph: "diamond" }
+  ],
+  density: [
+    { color: "#4073ff", label: "Diffuse cells", tooltip: "Low-density cells with little collapse pressure.", glyph: "speck" },
+    { color: "#6ed6ff", label: "Cloud threads", tooltip: "Moderate crowding where structure starts to appear.", glyph: "disc" },
+    { color: "#ffce5c", label: "Dense knots", tooltip: "High-density cells most likely to form stars.", glyph: "diamond" },
+    { color: "#ff6f5f", label: "Collapse cores", tooltip: "The brightest density concentrations in the current field.", glyph: "ring" }
+  ],
+  temperature: [
+    { color: "#50caff", label: "Cool gas", tooltip: "Cooler packets that can settle into denser regions.", glyph: "speck" },
+    { color: "#8df3b0", label: "Warm mixing", tooltip: "Mid-temperature packets exchanging heat.", glyph: "ring" },
+    { color: "#ffd05c", label: "Hot stars", tooltip: "Energetic packets and young star-forming regions.", glyph: "cross" },
+    { color: "#ff5e48", label: "Shock fronts", tooltip: "Very hot regions from feedback or violent collapse.", glyph: "cross" }
+  ],
+  metallicity: [
+    { color: "#5f8dff", label: "Pristine gas", tooltip: "Little to no heavy-element enrichment.", glyph: "speck" },
+    { color: "#7ee7bf", label: "Trace metals", tooltip: "Early enrichment spread through gas.", glyph: "ring" },
+    { color: "#ffb24a", label: "Rocky mix", tooltip: "Enough enrichment for rocky-world ingredients.", glyph: "diamond" },
+    { color: "#ff6fb1", label: "Heavy yield", tooltip: "The richest post-supernova material.", glyph: "diamond" }
+  ],
+  habitability: [
+    { color: "#5579ff", label: "Raw field", tooltip: "Regions without enough stability or enrichment yet.", glyph: "speck" },
+    { color: "#56d7a1", label: "Stable gas", tooltip: "Calmer enriched regions with improving retention.", glyph: "disc" },
+    { color: "#f6d36c", label: "Rocky candidates", tooltip: "Enriched regions with rocky-world potential.", glyph: "diamond" },
+    { color: "#9dffb3", label: "Life potential", tooltip: "Stable enriched packets above the habitability threshold.", glyph: "ring" }
+  ]
 };
 
 const emptyStats: SimStats = {
@@ -411,11 +497,9 @@ export function App() {
           </div>
         </div>
         <div className="legend">
-          <Legend color="#7ee7bf" label="Primordial matter" tooltip={LEGEND_TOOLTIPS["Primordial matter"]} />
-          <Legend color="#5bc9ff" label="Radiation" tooltip={LEGEND_TOOLTIPS.Radiation} />
-          <Legend color="#c49bff" label="Lepton haze" tooltip={LEGEND_TOOLTIPS["Lepton haze"]} />
-          <Legend color="#f6d36c" label="Star packet" tooltip={LEGEND_TOOLTIPS["Star packet"]} />
-          <Legend color="#ffb24a" label="Enriched metals" tooltip={LEGEND_TOOLTIPS["Enriched metals"]} />
+          {VIEW_LEGENDS[renderMode].map((item) => (
+            <Legend key={`${renderMode}-${item.label}`} {...item} />
+          ))}
         </div>
       </section>
 
@@ -614,7 +698,6 @@ function UniverseCanvas({
       <color attach="background" args={["#05070a"]} />
       <SimulationRenderer simRef={simRef} speedTarget={speedTarget} renderMode={renderMode} onSummary={onSummary} interactionRef={interactionRef} />
       <gridHelper args={[120, 12, "#1f2933", "#101820"]} position={[0, -52, 0]} />
-      <axesHelper args={[24]} />
       <OrbitControls
         makeDefault
         enableDamping
@@ -653,15 +736,18 @@ function SimulationRenderer({
   const colors = useMemo(() => new Float32Array(maxParticles * 3), [maxParticles]);
   const sizes = useMemo(() => new Float32Array(maxParticles), [maxParticles]);
   const alphas = useMemo(() => new Float32Array(maxParticles), [maxParticles]);
+  const shapes = useMemo(() => new Float32Array(maxParticles), [maxParticles]);
   const highlightCapacity = useMemo(() => Math.max(512, Math.min(6000, Math.ceil(maxParticles * 0.16))), [maxParticles]);
   const highlightPositions = useMemo(() => new Float32Array(highlightCapacity * 3), [highlightCapacity]);
   const highlightColors = useMemo(() => new Float32Array(highlightCapacity * 3), [highlightCapacity]);
   const highlightSizes = useMemo(() => new Float32Array(highlightCapacity), [highlightCapacity]);
   const highlightAlphas = useMemo(() => new Float32Array(highlightCapacity), [highlightCapacity]);
+  const highlightShapes = useMemo(() => new Float32Array(highlightCapacity), [highlightCapacity]);
   const densityPositions = useMemo(() => new Float32Array(DENSITY_CELL_COUNT * 3), []);
   const densityColors = useMemo(() => new Float32Array(DENSITY_CELL_COUNT * 3), []);
   const densitySizes = useMemo(() => new Float32Array(DENSITY_CELL_COUNT), []);
   const densityAlphas = useMemo(() => new Float32Array(DENSITY_CELL_COUNT), []);
+  const densityShapes = useMemo(() => new Float32Array(DENSITY_CELL_COUNT), []);
   const densityMass = useMemo(() => new Float32Array(DENSITY_CELL_COUNT), []);
   const densityMetal = useMemo(() => new Float32Array(DENSITY_CELL_COUNT), []);
   const color = useMemo(() => new THREE.Color(), []);
@@ -770,8 +856,10 @@ function SimulationRenderer({
             highlightColors[highlightIndex * 3] = color.r;
             highlightColors[highlightIndex * 3 + 1] = color.g;
             highlightColors[highlightIndex * 3 + 2] = color.b;
-            highlightSizes[highlightIndex] = p.star ? 5.4 : 3.4 + p.metallicity * 5.5 + p.habitability * 4;
-            highlightAlphas[highlightIndex] = p.star ? 0.95 : clamp(0.28 + p.metallicity * 1.6 + p.habitability * 0.5, 0.25, 0.78);
+            const highlightVisual = getHighlightVisual(p, mode);
+            highlightSizes[highlightIndex] = highlightVisual.size;
+            highlightAlphas[highlightIndex] = highlightVisual.alpha;
+            highlightShapes[highlightIndex] = highlightVisual.shape;
             highlightIndex += 1;
           }
         }
@@ -786,24 +874,28 @@ function SimulationRenderer({
         colors[drawIndex * 3] = color.r;
         colors[drawIndex * 3 + 1] = color.g;
         colors[drawIndex * 3 + 2] = color.b;
-        sizes[drawIndex] = p.star ? 3.6 : p.kind === "radiation" ? 1.15 : 1.55 + clamp(p.density, 0, 1.8) * 0.36;
-        alphas[drawIndex] = p.kind === "radiation" ? 0.52 : 0.66;
+        const visual = getParticleVisual(p, mode);
+        sizes[drawIndex] = visual.size;
+        alphas[drawIndex] = visual.alpha;
+        shapes[drawIndex] = visual.shape;
         drawIndex += 1;
       }
 
       const densityCount = updateDensity
-        ? writeDensityOverlay(densityMass, densityMetal, densityPositions, densityColors, densitySizes, densityAlphas)
+        ? writeDensityOverlay(mode, densityMass, densityMetal, densityPositions, densityColors, densitySizes, densityAlphas, densityShapes)
         : densityGeometryRef.current?.drawRange.count ?? 0;
       
       const positionAttr = geometryRef.current.getAttribute("position");
       const colorAttr = geometryRef.current.getAttribute("color");
       const sizeAttr = geometryRef.current.getAttribute("aSize");
       const alphaAttr = geometryRef.current.getAttribute("aAlpha");
+      const shapeAttr = geometryRef.current.getAttribute("aShape");
       geometryRef.current.setDrawRange(0, drawIndex);
       positionAttr.needsUpdate = true;
       colorAttr.needsUpdate = true;
       sizeAttr.needsUpdate = true;
       alphaAttr.needsUpdate = true;
+      shapeAttr.needsUpdate = true;
       geometryRef.current.boundingSphere = bounds;
 
       if (highlightGeometryRef.current) {
@@ -812,6 +904,7 @@ function SimulationRenderer({
         highlightGeometryRef.current.getAttribute("color").needsUpdate = true;
         highlightGeometryRef.current.getAttribute("aSize").needsUpdate = true;
         highlightGeometryRef.current.getAttribute("aAlpha").needsUpdate = true;
+        highlightGeometryRef.current.getAttribute("aShape").needsUpdate = true;
         highlightGeometryRef.current.boundingSphere = bounds;
       }
 
@@ -821,6 +914,7 @@ function SimulationRenderer({
         densityGeometryRef.current.getAttribute("color").needsUpdate = true;
         densityGeometryRef.current.getAttribute("aSize").needsUpdate = true;
         densityGeometryRef.current.getAttribute("aAlpha").needsUpdate = true;
+        densityGeometryRef.current.getAttribute("aShape").needsUpdate = true;
         densityGeometryRef.current.boundingSphere = bounds;
       }
 
@@ -849,6 +943,7 @@ function SimulationRenderer({
         <bufferAttribute attach="attributes-color" args={[colors, 3]} />
         <bufferAttribute attach="attributes-aSize" args={[sizes, 1]} />
         <bufferAttribute attach="attributes-aAlpha" args={[alphas, 1]} />
+        <bufferAttribute attach="attributes-aShape" args={[shapes, 1]} />
       </bufferGeometry>
       <primitive attach="material" object={particleMaterial} />
     </points>
@@ -858,6 +953,7 @@ function SimulationRenderer({
         <bufferAttribute attach="attributes-color" args={[densityColors, 3]} />
         <bufferAttribute attach="attributes-aSize" args={[densitySizes, 1]} />
         <bufferAttribute attach="attributes-aAlpha" args={[densityAlphas, 1]} />
+        <bufferAttribute attach="attributes-aShape" args={[densityShapes, 1]} />
       </bufferGeometry>
       <primitive attach="material" object={densityMaterial} />
     </points>
@@ -867,6 +963,7 @@ function SimulationRenderer({
         <bufferAttribute attach="attributes-color" args={[highlightColors, 3]} />
         <bufferAttribute attach="attributes-aSize" args={[highlightSizes, 1]} />
         <bufferAttribute attach="attributes-aAlpha" args={[highlightAlphas, 1]} />
+        <bufferAttribute attach="attributes-aShape" args={[highlightShapes, 1]} />
       </bufferGeometry>
       <primitive attach="material" object={highlightMaterial} />
     </points>
@@ -887,8 +984,85 @@ function makeParticleMaterial(opacity: number): THREE.ShaderMaterial {
 }
 
 function computeRenderStride(count: number, frameMs: number): number {
-  const target = frameMs > 30 ? 9_000 : frameMs > 22 ? 13_000 : 18_000;
+  const target = frameMs > 30 ? 12_000 : frameMs > 22 ? 18_000 : 32_000;
   return Math.max(1, Math.ceil(count / target));
+}
+
+function getParticleVisual(p: UniverseSimulation["particles"][number], mode: RenderMode): { size: number; alpha: number; shape: number } {
+  const density = clamp(p.density, 0, 2);
+  const metal = clamp(p.metallicity * 7, 0, 1);
+  const habitable = clamp(p.habitability, 0, 1);
+  const heat = clamp(p.temp / 1.7, 0, 1);
+
+  if (mode === "species") {
+    const shapeBySpecies: Record<SpeciesId, number> = {
+      radiant: 2,
+      baryon: 1,
+      neutral: 3,
+      lepton: 4,
+      seedMetal: 3,
+      exotic: 4
+    };
+    return {
+      size: p.kind === "radiation" ? 1.75 : 1.5 + density * 0.34,
+      alpha: p.kind === "radiation" ? 0.42 : 0.68,
+      shape: shapeBySpecies[p.species]
+    };
+  }
+
+  if (mode === "elements") {
+    const complexityShape = p.elementComplexity >= 6 ? 4 : p.elementComplexity >= 4 ? 3 : p.elementComplexity >= 2 ? 2 : 1;
+    return {
+      size: 1.35 + p.elementComplexity * 0.18 + metal * 0.9,
+      alpha: p.elementFamily === "primordial" ? 0.34 : 0.72,
+      shape: complexityShape
+    };
+  }
+
+  if (mode === "density") {
+    return {
+      size: 1.2 + density * 1.2,
+      alpha: 0.22 + density * 0.34,
+      shape: density > 1.15 ? 3 : 1
+    };
+  }
+
+  if (mode === "temperature") {
+    return {
+      size: 1.2 + heat * 1.55,
+      alpha: 0.3 + heat * 0.43,
+      shape: heat > 0.68 ? 4 : heat > 0.38 ? 2 : 1
+    };
+  }
+
+  if (mode === "metallicity") {
+    return {
+      size: 1.15 + metal * 2.35,
+      alpha: 0.2 + metal * 0.62,
+      shape: metal > 0.52 ? 3 : metal > 0.18 ? 2 : 1
+    };
+  }
+
+  if (mode === "habitability") {
+    return {
+      size: 1.15 + habitable * 2.75 + metal * 0.5,
+      alpha: 0.19 + habitable * 0.74 + metal * 0.16,
+      shape: habitable > 0.28 ? 2 : metal > 0.22 ? 3 : 1
+    };
+  }
+
+  return {
+    size: p.star ? 3.7 : p.kind === "radiation" ? 1.35 : 1.48 + density * 0.32 + metal * 0.62,
+    alpha: p.kind === "radiation" ? 0.34 : 0.56 + metal * 0.14,
+    shape: p.star ? 2 : metal > 0.34 ? 3 : p.kind === "radiation" ? 2 : 1
+  };
+}
+
+function getHighlightVisual(p: UniverseSimulation["particles"][number], mode: RenderMode): { size: number; alpha: number; shape: number } {
+  if (p.star) return { size: mode === "temperature" ? 6.2 : 5.2, alpha: 0.92, shape: 2 };
+  if (p.habitability > 0.15) return { size: 3.2 + p.habitability * 5.6, alpha: 0.68, shape: 2 };
+  if (mode === "elements" || mode === "metallicity") return { size: 2.2 + p.metallicity * 7.2, alpha: 0.58, shape: 3 };
+  return { size: 2.1 + p.metallicity * 5.4, alpha: 0.42, shape: 1 };
 }
 
 function accumulateDensity(p: UniverseSimulation["particles"][number], mass: Float32Array, metal: Float32Array): void {
@@ -902,19 +1076,21 @@ function accumulateDensity(p: UniverseSimulation["particles"][number], mass: Flo
 }
 
 function writeDensityOverlay(
+  mode: RenderMode,
   mass: Float32Array,
   metal: Float32Array,
   positions: Float32Array,
   colors: Float32Array,
   sizes: Float32Array,
-  alphas: Float32Array
+  alphas: Float32Array,
+  shapes: Float32Array
 ): number {
   let count = 0;
   const size = DENSITY_GRID_SIZE;
   const sizeSq = size * size;
   for (let i = 0; i < mass.length; i += 1) {
     const value = mass[i];
-    if (value < 1.2) continue;
+    if (value < 0.42) continue;
     const z = Math.floor(i / sizeSq);
     const y = Math.floor((i - z * sizeSq) / size);
     const x = i - z * sizeSq - y * size;
@@ -923,11 +1099,26 @@ function writeDensityOverlay(
     positions[count * 3 + 2] = ((z + 0.5) / size - 0.5) * 100;
     const intensity = clamp(value / 38, 0, 1);
     const enrichment = clamp(metal[i] / Math.max(1, value) * 16, 0, 1);
-    colors[count * 3] = 0.14 + enrichment * 0.55 + intensity * 0.12;
-    colors[count * 3 + 1] = 0.48 + intensity * 0.22;
-    colors[count * 3 + 2] = 0.62 + enrichment * 0.18;
-    sizes[count] = 8 + intensity * 24;
-    alphas[count] = 0.025 + intensity * 0.12;
+    if (mode === "temperature") {
+      colors[count * 3] = 0.25 + intensity * 0.75;
+      colors[count * 3 + 1] = 0.3 + Math.sin(intensity * Math.PI) * 0.42;
+      colors[count * 3 + 2] = 0.9 - intensity * 0.55;
+    } else if (mode === "metallicity" || mode === "elements") {
+      colors[count * 3] = 0.2 + enrichment * 0.72;
+      colors[count * 3 + 1] = 0.42 + enrichment * 0.28;
+      colors[count * 3 + 2] = 0.72 - enrichment * 0.38;
+    } else if (mode === "habitability") {
+      colors[count * 3] = 0.16 + enrichment * 0.24;
+      colors[count * 3 + 1] = 0.5 + intensity * 0.32;
+      colors[count * 3 + 2] = 0.48 + enrichment * 0.18;
+    } else {
+      colors[count * 3] = 0.14 + enrichment * 0.5 + intensity * 0.1;
+      colors[count * 3 + 1] = 0.48 + intensity * 0.22;
+      colors[count * 3 + 2] = 0.62 + enrichment * 0.18;
+    }
+    sizes[count] = 2.6 + intensity * 11.5;
+    alphas[count] = 0.012 + intensity * 0.06;
+    shapes[count] = mode === "density" ? 3 : mode === "metallicity" || mode === "habitability" ? 2 : 0;
     count += 1;
   }
   return count;
@@ -1037,8 +1228,8 @@ function Readout({ label, value, tooltip }: { label: string; value: string | num
   return <div className="readout has-tooltip" data-tooltip={tooltip} title={tooltip}><span>{label}</span><strong>{value}</strong></div>;
 }
 
-function Legend({ color, label, tooltip }: { color: string; label: string; tooltip?: string }) {
-  return <span className="legend-item has-tooltip" data-tooltip={tooltip} title={tooltip}><i className="dot" style={{ background: color }} />{label}</span>;
+function Legend({ color, label, tooltip, glyph }: LegendItemDef) {
+  return <span className="legend-item has-tooltip" data-tooltip={tooltip} title={tooltip}><i className={`dot glyph-${glyph}`} style={{ background: color, color }} />{label}</span>;
 }
 
 function TimelineEvent({ event }: { event: SimEvent }) {

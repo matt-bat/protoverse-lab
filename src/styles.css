@@ -319,6 +319,70 @@ h1 {
   width: 10px;
   height: 10px;
   border-radius: 50%;
+  position: relative;
+  flex: 0 0 auto;
+  box-shadow: 0 0 12px color-mix(in srgb, currentColor 25%, transparent);
+}
+
+.legend-item .dot {
+  width: 12px;
+  height: 12px;
+}
+
+.glyph-speck {
+  border-radius: 50%;
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.16), 0 0 10px rgba(255, 255, 255, 0.12);
+}
+
+.glyph-disc {
+  border-radius: 50%;
+  opacity: 0.82;
+}
+
+.glyph-ring {
+  border-radius: 50%;
+  background: transparent !important;
+  border: 2px solid currentColor;
+}
+
+.glyph-ring::after {
+  content: "";
+  position: absolute;
+  inset: 3px;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+.glyph-diamond {
+  border-radius: 2px;
+  transform: rotate(45deg);
+}
+
+.glyph-cross {
+  border-radius: 0;
+  background: transparent !important;
+}
+
+.glyph-cross::before,
+.glyph-cross::after {
+  content: "";
+  position: absolute;
+  background: currentColor;
+  border-radius: 2px;
+}
+
+.glyph-cross::before {
+  left: 5px;
+  top: 0;
+  width: 2px;
+  height: 12px;
+}
+
+.glyph-cross::after {
+  left: 0;
+  top: 5px;
+  width: 12px;
+  height: 2px;
 }
 
 .panel {
