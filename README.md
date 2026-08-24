@@ -4,9 +4,20 @@ Created by Matthew Bateman.
 
 Protoverse Lab is a seeded universe-evolution sandbox built with React, TypeScript, and Three.js. It lets you generate small “possible universe” runs, tune the starting conditions, watch matter cluster and enrich, and save interesting seeds for later.
 
+> Like this project? You can [support ongoing development on Ko-fi](https://ko-fi.com/matt0bat), helping me maintain existing tools and release more public projects.
+
 This is not meant to be a literal physics engine. The simulation uses coarse packets that stand in for matter, radiation, proto-particles, enriched material, and habitability potential. The goal is to make the chain from early packets to stars, enrichment, rocky worlds, and life-capable regions understandable and interactive.
 
 The default run starts with 8,000 packets so movement and camera controls stay smooth. Higher counts are available up to 60,000 packets for stronger machines.
+
+## How it works
+
+1. A seed and parameter set initialize repeatable particle species, positions, velocities, temperatures, and material traits.
+2. The TypeScript simulation advances expansion, gravity, cooling, clustering, stellar formation, supernova enrichment, and coarse planetary potential.
+3. Each tick derives metrics and events from the simulated state while React keeps controls and saved seed data synchronized.
+4. React Three Fiber and Three.js render sampled particles and highlights in the browser with no server-side simulation.
+
+There is no AI backend, model inference, training data, or generative-AI service. The simulation is deterministic TypeScript math running locally in the browser.
 
 ## What It Does
 
